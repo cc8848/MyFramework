@@ -1,0 +1,172 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
+<%@include file="/include/include.jsp"%>
+#set($j="$")
+<c:set var="actionUrl"  scope="request" >
+   ${j}{pageContext.request.contextPath}/${head.viewFolder}.do
+</c:set>
+<c:set var="tableName" value="${head.tableName}" scope="request" />
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${head.tableContent}</title>
+    <%@include file="/include/head.jsp"%>
+    <link rel="stylesheet" href="${j}{pageContext.request.contextPath}/plug-in/ztree/css/demo.css" type="text/css">
+    <link rel="stylesheet" href="${j}{pageContext.request.contextPath}/plug-in/ztree/css/zTreeStyle/zTreeStyle.css" type="text/css">
+    <script type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/ztree/js/jquery.ztree.core-3.5.js"></script>
+    <script type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/ztree/js/jquery.ztree.excheck-3.5.js"></script>
+    <script type="text/javascript" >
+        var context='${j}{ pageContext.request.contextPath}';
+        window.onload=(function(){ getDataList();})//初始化
+        function getDataList(){
+            ajaxJson("${j}{ actionUrl}?gettree",{},function(data){
+                ${j}.fn.zTree.init($("#treeDemo"), setting, data);
+            });
+        }
+        //打开更新对话框
+        function showUpdateDia(){
+            var rows=getZtreeObj().getSelectedNodes();
+            if(rows.length==0){
+                alertMsg("请选择条目");
+                return false;
+            }
+            if(rows.length>1){
+                alertMsg("只能选择一个条目");
+                return false;
+            }
+            var row=rows[0];
+            ${j}("#editForm").form("clear");
+            ajaxJson("${j}{actionUrl}?get",{id:row.id},function(data){
+                if(data){
+                    ${j}("#editForm").form("load",data);
+                    ${j}("#editDia").dialog("open").dialog("vcenter").dialog("hcenter");
+                    ${j}("#pid").combotree("reload");
+                    ${j}("#pid").combotree("setValue",row.pid);
+                }
+
+            });
+        }
+        //删除
+        function delData(){
+            var rows=getZtreeObj().getSelectedNodes();
+            if(rows.length==0){
+                alertMsg("请选择条目");
+                return false;
+            }
+            if(rows.length>1){
+                alertMsg("只能选择一个条目");
+                return false;
+            }
+            var row=rows[0];
+            ${j}.messager.confirm("提示","确定删除",function(d){
+                if(d){
+                    var childNode=row.children;
+                    if(childNode){
+                        alertMsg("当前菜单有下级菜单，不能删除！");
+                        return false;
+                    }
+
+                    ajaxJson("${j}{actionUrl}?del",{id:row.id},function(data){
+                        slideMsgInfo(data.msg);
+                        getDataList();
+                    });
+                }
+
+            });
+
+        }
+        var setting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            }
+        };
+        /**
+         *保存数据
+         * @returns {boolean}
+         */
+        function saveData(){
+            if(!${j}("#editForm").form("validate"))
+                return false;
+            ajaxJson("${j}{actionUrl}?save",${j}("#editForm").serialize(),function(data){
+                closeDiaWithMsgWhenSuccess("editDia",data);
+                getDataList();
+            });
+        }
+        //添加条目
+        function addItem(){
+            var rows=getZtreeObj().getSelectedNodes();
+            if(rows.length>1){
+                alertMsg("只能选择一个父节点");
+                return false;
+            }
+            var node=null;
+            if(rows.length>0)
+                node=rows[0];
+            ${j}("#editForm").form("clear");
+            ${j}("#pid").combotree("reload");
+            if(node){
+                if(node.id!=0)
+                    ${j}("#pid").combotree("setValue",node.id);
+            }
+            ${j}("#editDia").dialog("open").dialog("vcenter").dialog("hcenter");
+        }
+        //获取ztreeobject
+        function getZtreeObj(){
+            return ${j}.fn.zTree.getZTreeObj("treeDemo");
+        }
+        function zTreeOnClick(event, treeId, treeNode) {
+            return false;
+        }
+    </script>
+</head>
+<body class="body_s">
+<div align="left" class="easyui-panel" style="width: 950px;height: 600px"   fit="true">
+
+    <div  id="tools2" class="list_btn" style="height:40px;border-bottom:1px solid #bebebe;margin:0 0 15px 0;">
+        <ul >
+            <li class="list_btn_name">
+                &nbsp;&nbsp;<b class="head_font" style="font-size:13px;">${head.tableContent}</b>
+            </li>
+            <li id="tools" class="list_a" style="padding:0 10px 0 0;">
+                <a href="javascript:void(0);"  class="easyui-linkbutton" iconCls="icon-add" onclick="addItem()">添加</a>
+                <a href="javascript:void(0);"  class="easyui-linkbutton" iconCls="icon-edit" onclick="showUpdateDia()">修改</a>
+                <a href="javascript:void(0);"  class="easyui-linkbutton" iconCls="icon-remove" onclick="delData()">删除</a>
+            </li>
+        </ul>
+    </div>
+    <ul id="treeDemo" class="ztree" style="height: 80%;"></ul>
+</div>
+<div id="editDia" title="更新" class="easyui-dialog" data-options="closed:true,width:600,height:400">
+    <form id="editForm">
+        <input name="id" type="hidden" id="edit_id">
+        <table style="width:90%">
+            <tr>
+                <td height="20"></td>
+            </tr>
+            <tr>
+                <td style="padding: 5px" align="right" width="20%">上级：</td>
+                <td style="padding: 5px">
+                    <input   name='pId' id="pid" class="easyui-combotree" data-options="url:'${j}{actionUrl}?gettree'" />
+                </td>
+            </tr>
+#foreach($field in ${head.fields})
+#if(${field.isInsert()})
+                <tr>
+                    <td style="padding: 5px" align="right">${field.fieldContent}：</td>
+                    <td style="padding: 5px">
+                        ${ViewUtil.getFieldInput(${field})}
+                    </td>
+                 </tr>
+#set($colCount=1+$colCount)
+#end
+#end
+            <tr align="center">
+                <td colspan="2" align="right"><a href="javascript:void(0);"    class="easyui-linkbutton" onclick="saveData()">提交</a></td>
+            </tr>
+
+        </table>
+    </form>
+</div>
+</body>
+</html>

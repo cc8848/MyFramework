@@ -1,0 +1,5 @@
+package ${head.basePackageName}.service;
+
+import com.sys.service.ICommonService;
+public interface ${StringUtil.toEntityName(${head.tableName})}Service  extends ICommonService {
+}

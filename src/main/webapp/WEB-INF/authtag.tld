@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+        "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>1.2</jsp-version>
+    <short-name>pro</short-name>
+    <uri>/pro-tags</uri>
+    <display-name>"自定义标签"</display-name>
+
+    <!-- 按钮权限标签 -->
+    <tag>
+        <name>authFilter</name>
+        <tag-class>com.sys.tags.PermissionTag</tag-class>
+        <body-content>jsp</body-content>
+        <display-name>按钮权限标签</display-name>
+        <description>将当前用户对应菜单中不拥有按钮权限的按钮和操作隐藏</description>
+        <attribute>
+            <name>buttonCode</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>对应按钮编码</description>
+        </attribute>
+        <attribute>
+            <name>actionUrl</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>对应按钮请求url</description>
+        </attribute>
+        <attribute>
+            <name>show</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>默认是否显示</description>
+        </attribute>
+    </tag>
+    <!-- 按钮权限标签 -->
+    <tag>
+        <name>dict</name>
+        <tag-class>com.sys.tags.DicTag</tag-class>
+        <body-content>jsp</body-content>
+        <display-name>按钮权限标签</display-name>
+        <description>将当前用户对应菜单中不拥有按钮权限的按钮和操作隐藏</description>
+        <attribute>
+            <name>dicKey</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>字典键对应字段</description>
+        </attribute>
+        <attribute>
+            <name>dicVal</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>字典值对应字段</description>
+        </attribute>
+        <attribute>
+            <name>dicTable</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>字典要查的表</description>
+        </attribute>
+        <attribute>
+            <name>code</name>
+            <rtexprvalue>true</rtexprvalue>
+            <description>字典编码</description>
+        </attribute>
+    </tag>
+</taglib>

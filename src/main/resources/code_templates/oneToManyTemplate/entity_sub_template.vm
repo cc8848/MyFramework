@@ -1,0 +1,61 @@
+package ${head.basePackageName}.entity;
+
+import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.*;
+import com.code.entity.BaseEntity;
+import org.codehaus.jackson.annotate.JsonIgnore;
+##实体类
+/**
+ *${head.tableContent}
+ *${today}
+ **/
+@Entity
+@Table(name = "${head.tableName}")
+public class ${StringUtil.toEntityName(${head.tableName})}Entity   extends BaseEntity{
+##成员变量
+#foreach($field in ${head.fields})
+    //${field.fieldContent}
+#if(${field.hasMain()})
+    @ManyToOne()
+    @JoinColumn(name ="${field.fieldName}",referencedColumnName="${field.mainId}")
+    @JsonIgnore
+    private ${StringUtil.toEntityName(${field.mainTable})}Entity ${StringUtil.toFieldName(${field.mainTable})}Entity;
+#else
+#if(${field.isKey()})
+    @Id
+    @GeneratedValue(generator = "paymentableGenerator")
+    @GenericGenerator(name = "paymentableGenerator", strategy = "uuid")
+    @Column(name ="ID",nullable=false,length=36)
+#else
+    @Column(name="${field.fieldName}"#if(${field.getLength()}>0) ,length = ${field.getLength()}#end #if(${field.isNull}) #end)
+#end
+    private ${ClassUtil.getClassName(${field.fieldType})}  ${StringUtil.toFieldName(${field.fieldName})}#if(${field.fieldType}=='int') = 0 #end;
+#end
+#end
+##构造函数
+    public ${StringUtil.toEntityName(${head.tableName})}Entity(){
+
+    }
+
+    public ${StringUtil.toEntityName(${head.tableName})}Entity(String id){
+        setId(id);
+    }
+##get set 方法
+#foreach($field in ${head.fields})
+#if(${field.hasMain()})
+    public ${StringUtil.toEntityName(${field.mainTable})}Entity ${StringUtil.toGetMethodName(${field.mainTable})}Entity(){
+        return ${StringUtil.toFieldName(${field.mainTable})}Entity;
+    }
+    public void ${StringUtil.toSetMethodName(${field.mainTable})}Entity(${StringUtil.toEntityName(${field.mainTable})}Entity ${StringUtil.toFieldName(${field.mainTable})}Entity){
+        this.${StringUtil.toFieldName(${field.mainTable})}Entity=${StringUtil.toFieldName(${field.mainTable})}Entity;
+    }
+#else
+    public ${ClassUtil.getClassName(${field.fieldType})} ${StringUtil.toGetMethodName(${field.fieldName})}(){
+        return ${StringUtil.toFieldName(${field.fieldName})};
+    }
+    public void ${StringUtil.toSetMethodName(${field.fieldName})}(${ClassUtil.getClassName(${field.fieldType})} ${StringUtil.toFieldName(${field.fieldName})}){
+        this.${StringUtil.toFieldName(${field.fieldName})}=${StringUtil.toFieldName(${field.fieldName})};
+    }
+#end
+#end
+}

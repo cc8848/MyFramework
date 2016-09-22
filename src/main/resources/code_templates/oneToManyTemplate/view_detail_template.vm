@@ -1,0 +1,103 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@include file="/include/include.jsp"%>
+#set($j="$")
+#set($idpre="#")
+<c:set var="actionUrl" >
+    ${j}{pageContext.request.contextPath}/${head.viewFolder}.do
+</c:set>
+<c:set var="tableName" value="${head.tableName}" scope="request" />
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${head.tableContent}更新</title>
+    <%@include file="/include/head.jsp"%>
+    <%@include file="/include/code/one2many/view_ext.jsp" %>
+    <script  type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/code_js/common_method.js" ></script>
+    <script  type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/code_js/one2many/method.js" ></script>
+    <script type="text/javascript" >
+        var datagridIdArry=new Array();
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+                datagridIdArry.push('${StringUtil.toFieldName(${sub.tableName})}s');
+#end
+#end
+        var id='${j}{ param.id}';
+        window.onload=(function(){
+                ${j}("#editForm").form("reset");
+
+            if(jQuery.trim(id).length>0){
+                ajaxJson("${j}{ actionUrl}?get",{id:id},function(data){
+                    if(data){
+                            ${j}("#editForm").form("load",data);
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+                                ajaxJson("${j}{actionUrl}?${StringUtil.toFieldName(${sub.tableName})}s",{"${StringUtil.toFieldName(${head.tableName})}Entity.id":id},function(data1){
+                                        ${j}("${idpre}${StringUtil.toFieldName(${sub.tableName})}s").datagrid("loadData",data1);
+                                });
+#end
+#end
+
+                    }
+                });
+            }
+        });
+        //查看文件按钮
+        function showViewFile(value,row,fieldName,showType){
+            var button="";
+
+            if(${j}.trim(value).length<=0)
+            value="upload/"+row.id+"/"+fieldName;
+            button="<a href='#' onclick=\" showFileList('"+value+"','"+showType+"')\">[查看文件]</a>";
+
+            return button;
+        }
+    </script>
+</head>
+<body>
+<div class="easyui-layout" fit="true"  >
+  <div data-options="region:'north'" class="search_frame" align="center"  >
+    <form id="editForm">
+    <input name="id" type="hidden" id="edit_id">
+    <table align="center">
+    <tr>
+#set($colCount=1)
+#foreach($field in ${head.fields})
+#if(${field.isInsert()})
+                <td style="padding: 5px">${field.fieldContent}：</td>
+                <td style="padding: 5px">
+                    ${ViewUtil.getDetailShow(${field})}
+                </td>
+#if(${colCount}%3==0)
+                </tr>
+                <tr>
+#end
+#set($colCount=1+$colCount)
+#end
+#end
+    </tr>
+    </table>
+    </form>
+  </div>
+  <div  data-options="region:'center'" >
+#if(${head.subList})
+    <div id="subListDiv" class="easyui-tabs"  >
+#foreach($sub in ${head.subList})
+            <div  title="${sub.tableContent}">
+                <table id="${StringUtil.toFieldName(${sub.tableName})}s"   class="easyui-datagrid" >
+                    <thead>
+#foreach($subfields in ${sub.fields})
+#if(${subfields.isShowList()})
+                            ${ViewUtil.getFieldShow(${subfields})}
+#end
+#end
+                    </thead>
+                </table>
+            </div>
+
+#end
+    </div>
+
+#end
+</div>
+</body>
+</html>

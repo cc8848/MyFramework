@@ -1,0 +1,116 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@include file="/include/include.jsp"%>
+#set($j="$")
+#set($idpre="#")
+<c:set var="actionUrl" >
+    ${j}{pageContext.request.contextPath}/${head.viewFolder}.do
+</c:set>
+<c:set var="tableName" value="${head.tableName}" scope="request" />
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${head.tableContent}更新</title>
+    <%@include file="/include/head.jsp"%>
+    <%@include file="/include/code/one2many/view_ext.jsp" %>
+    <script  type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/code_js/common_method.js" ></script>
+    <script  type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/code_js/one2many/method.js" ></script>
+    <script type="text/javascript" >
+        var datagridIdArry=new Array();
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+        datagridIdArry.push('${StringUtil.toFieldName(${sub.tableName})}s');
+#end
+#end
+        var id='${j}{ param.id}';
+        window.onload=(function(){
+
+            loadData(id);
+        });
+        function loadData(id){
+           ${j}("#editForm").form("reset");
+            if(jQuery.trim(id).length>0){
+                ajaxJson("${j}{ actionUrl}?get",{id:id},function(data){
+                    if(data){
+                            ${j}("#editForm").form("load",data);
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+                                ajaxJson("${j}{actionUrl}?${StringUtil.toFieldName(${sub.tableName})}s",{"${StringUtil.toFieldName(${head.tableName})}Entity.id":id},function(data1){
+                                        ${j}("${idpre}${StringUtil.toFieldName(${sub.tableName})}s").datagrid("loadData",data1);
+                                });
+#end
+#end
+
+                    }
+                });
+            }
+        }
+
+        //子表文件上传按钮
+        function list_file_upload(id,name,val,showType){
+            return "<a href=\"#\"  onclick=\"fileList_sub('"+id+"','"+name+"','"+val+"','"+showType+"')\">[附件]</a>";
+        }
+
+    </script>
+</head>
+<body>
+<div class="easyui-layout"  fit="true"  >
+   <div data-options="region:'north'" style="height: 120px;" align="center"  >
+    <form id="editForm">
+    <input name="id" type="hidden" id="edit_id">
+    <table align="center">
+    <tr>
+#set($colCount=1)
+#foreach($field in ${head.fields})
+#if(${field.isInsert()})
+                <td style="padding: 5px">${field.fieldContent}：</td>
+                <td style="padding: 5px">
+                    ${ViewUtil.getFieldInput(${field})}
+                </td>
+ #if(${colCount}%3==0)
+                </tr>
+                <tr>
+#end
+#set($colCount=1+$colCount)
+#end
+#end
+    </tr>
+    </table>
+    </form>
+</div>
+    <div data-options="region:'south'" style="height: 30px;"  align="center" >
+        <a href="javascript:void(0);"  class=" easyui-linkbutton" onclick="saveData()">保存</a>
+    </div>
+<div  data-options="region:'center'" >
+#if(${head.subList})
+<div id="subListDiv" class="easyui-tabs" >
+#foreach($sub in ${head.subList})
+    <div  title="${sub.tableContent}">
+        <table id="${StringUtil.toFieldName(${sub.tableName})}s"   class="easyui-datagrid" data-options="toolbar:'#tb${velocityCount}'">
+            <thead>
+                <th field="id" data-options="checkbox:true"></th>
+#foreach($subfields in ${sub.fields})
+#if(${subfields.isShowList()})
+                ${ViewUtil.getEditFieldShow(${subfields})}
+#end
+#end
+            </thead>
+        </table>
+
+
+    </div>
+    <div id="tb${velocityCount}">
+        <a href="javascript:void(0)" class=" easyui-linkbutton" data-options="iconCls:'icon-add',plain:true" onclick="addItem('${StringUtil.toFieldName(${sub.tableName})}s')">增加</a>
+        <a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-edit',plain:true" onclick="editItem('${StringUtil.toFieldName(${sub.tableName})}s')">修改</a>
+        <a href="javascript:void(0)" class=" easyui-linkbutton" data-options="iconCls:'icon-remove',plain:true" onclick="deleteItem('${StringUtil.toFieldName(${sub.tableName})}s')">删除</a>
+    </div>
+#end
+</div>
+
+#end
+</div>
+</div>
+<div id="fileDia" title="浏览文件" class="easyui-dialog" data-options="closed:true,width:800,height:500">
+    <iframe scrolling="auto" id="fileFrame"  frameborder="0"   src="" style="width:100%;height:100%;"></iframe>
+</div>
+</body>
+</html>

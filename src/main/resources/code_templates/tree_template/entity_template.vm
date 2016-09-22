@@ -1,0 +1,40 @@
+package ${head.basePackageName}.entity;
+
+import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.*;
+import com.code.entity.BaseTreeEntity;
+
+@Entity
+@Table(name = "${head.tableName}")
+public class ${StringUtil.toEntityName(${head.tableName})}Entity   extends BaseTreeEntity{
+#foreach($field in ${head.fields})
+    //${field.fieldContent}
+#if(${field.isKey()})
+    @Id
+    @GenericGenerator(name = "generator", strategy = "assigned")
+#else
+    @Column(name="${field.fieldName}"#if(${field.getLength()}>0) ,length = ${field.getLength()}#end #if(${field.isNull}) ,nullable = ${field.isNull()}#end)
+#end
+    private ${ClassUtil.getClassName(${field.fieldType})}  ${StringUtil.toFieldName(${field.fieldName})}#if(${field.fieldType}=='int') = 0 #end;
+#end
+
+    public ${StringUtil.toEntityName(${head.tableName})}Entity(){
+
+    }
+
+    public ${StringUtil.toEntityName(${head.tableName})}Entity(Long id){
+        setId(id);
+    }
+
+#foreach($field in ${head.fields})
+    public ${ClassUtil.getClassName(${field.fieldType})} ${StringUtil.toGetMethodName(${field.fieldName})}(){
+        return ${StringUtil.toFieldName(${field.fieldName})};
+    }
+    public void ${StringUtil.toSetMethodName(${field.fieldName})}(${ClassUtil.getClassName(${field.fieldType})} ${StringUtil.toFieldName(${field.fieldName})}){
+        this.${StringUtil.toFieldName(${field.fieldName})}=${StringUtil.toFieldName(${field.fieldName})};
+    }
+#end
+    public String getText(){
+        return name;
+    }
+}

@@ -1,0 +1,163 @@
+#set($url=${head.viewFolder})
+#set($entityName=${StringUtil.toEntityName(${head.tableName})})
+#set($fieldName=${StringUtil.toFieldName(${head.tableName})})
+package ${head.basePackageName}.controller;
+
+import com.sys.constant.Globals;
+import ${head.basePackageName}.entity.${entityName}Entity;
+import ${head.basePackageName}.service.${entityName}Service;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.beanutils.BeanUtils;
+import org.hibernate.criterion.Restrictions;
+import com.sys.service.ISystemService;
+import com.sys.util.*;
+import org.hibernate.criterion.Criterion;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.hibernate.criterion.DetachedCriteria;
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+@Controller
+@RequestMapping("/$url")
+public class ${entityName}Controller {
+    @Resource
+    private ${entityName}Service ${fieldName}Service;
+    @Resource
+    private ISystemService systemService;
+    /**
+     * 转入页面
+     * @return
+     */
+    @RequestMapping(params = "toList")
+    public String toList(HttpServletRequest request){
+        request.setAttribute("_modulesLink",ContextHolderUtil.getRequestUrl());
+        request.setAttribute("_conditions", ResourceUtil.getParamsMap(request));
+        return "$url/${head.tableName}_list";
+    }
+    /**
+    * 获取树形列表
+    * @param
+    * @return
+    */
+    @RequestMapping(params = "gettree")
+    @ResponseBody
+    public List<${entityName}Entity> getTree(String pid){
+        DetachedCriteria detachedCriteria=DetachedCriteria.forClass(${entityName}Entity.class);
+        if(pid==null) pid="0";
+        List<${entityName}Entity> list= ${fieldName}Service.findDataList(detachedCriteria);
+        return com.code.util.TreeUtil.combineTree(list,pid);
+    }
+    /**
+    * 保存或更新
+    * @param bean
+    * @return
+    */
+    @RequestMapping(params = "save")
+    @ResponseBody
+    public SuccessMsg save(${entityName}Entity bean){
+        SuccessMsg json=new SuccessMsg();
+        String logType=Globals.LOG_INSERT;
+        Map<String,Object> dataMap=new HashMap<>();
+        if(StringUtils.isBlank(bean.getId())){
+            Serializable id=${fieldName}Service.saveReturnId(bean);
+                json.setSuccess(id!=null);
+
+        }else{
+            ${entityName}Entity ${fieldName}Entity=${fieldName}Service.getEntity(${entityName}Entity.class,bean.getId());
+            if(${fieldName}Entity==null) ${fieldName}Entity=new ${entityName}Entity();
+            BeanUtil.copyNotNull2Bean(bean,${fieldName}Entity);
+            json.setSuccess(${fieldName}Service.update(${fieldName}Entity));
+            logType=Globals.LOG_UPDATE;
+        }
+        dataMap.put("bean",bean);
+        json.setDataMap(dataMap);
+        if(json.isSuccess()) json.setMsg("保存成功!");
+        else  json.setMsg("保存失败！");
+        systemService.addLog(${entityName}Entity.class.getSimpleName()+ json.getMsg(), logType);
+        return json;
+    }
+
+    /**
+    * 获取实体bean 返回json
+    * @param id
+    * @return
+    */
+    @RequestMapping(params = "get")
+    @ResponseBody
+    public ${entityName}Entity get(String id){
+        Assert.hasLength(id,"请求id为空！");
+        return  ${fieldName}Service.getEntity(${entityName}Entity.class,id);
+    }
+
+    /**
+    * 获取详情
+    * @param id
+    * @param request
+    * @return
+    */
+    @RequestMapping(params = "detail")
+    public String detail(String id,HttpServletRequest request){
+        Assert.notNull(id);
+        request.setAttribute("bean",${fieldName}Service.getEntity(${entityName}Entity.class,id));
+        return "$url/${head.tableName}_detail";
+    }
+    /**
+    * 删除
+    * @param id
+    * @return
+    */
+    @RequestMapping(params = "del")
+    @ResponseBody
+    public SuccessMsg del(String id){
+        SuccessMsg j=new SuccessMsg();
+        ${entityName}Entity d=new ${entityName}Entity();
+        d.setId(id);
+#if(${head.isIndex}==1)
+        j.setSuccess(${fieldName}Service.delUseFlag(d));
+#else
+        j.setSuccess(${fieldName}Service.delete(d));
+#end
+        if(j.isSuccess())
+            j.setMsg("删除成功!");
+        else
+            j.setMsg("删除失败！");
+        systemService.addLog(${entityName}Entity.class.getSimpleName()+j.getMsg(),Globals.LOG_DEL);
+        return j;
+    }
+
+    /**
+    * 批量删除
+    * @param ids
+    * @return
+    */
+    @RequestMapping(params = "muldel")
+    @ResponseBody
+    public SuccessMsg mulDel(String[] ids){
+        SuccessMsg j=new SuccessMsg();
+        if (ids != null) {
+            j.setSuccess(true);
+            j.setMsg("成功删除"+ids.length+"条记录");
+            for(int i=0;i<ids.length;i++){
+#if(${head.isIndex}==1)
+                if(!${fieldName}Service.delUseFlag(new ${entityName}Entity(ids[i]))){
+#else
+                if(!${fieldName}Service.delete(new ${entityName}Entity(ids[i]))){
+#end
+                    j.setSuccess(false);
+                    j.setMsg("删除失败!");
+                }
+                systemService.addLog(${entityName}Entity.class.getSimpleName()+j.getMsg(),Globals.LOG_DEL);
+            }
+        }
+        return j;
+
+    }
+}

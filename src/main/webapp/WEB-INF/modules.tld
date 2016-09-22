@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
+        "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+<taglib>
+    <tlib-version>1.0</tlib-version>
+    <jsp-version>1.2</jsp-version>
+    <short-name>module</short-name>
+    <uri>/module-tags</uri>
+    <display-name>"组件标签"</display-name>
+
+    <!-- 组件标签 -->
+    <tag>
+        <name>module</name>
+        <tag-class>com.code.tags.ModulesTag</tag-class>
+        <body-content>jsp</body-content>
+        <display-name>组件标签</display-name>
+        <description>提供组件支持</description>
+        <attribute>
+            <name>tableName</name>
+            <required>true</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>表名/菜单名</description>
+        </attribute>
+    </tag>
+</taglib>

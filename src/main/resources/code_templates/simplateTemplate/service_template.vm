@@ -1,0 +1,11 @@
+package ${head.basePackageName}.service.impl;
+
+import ${head.basePackageName}.service.${StringUtil.toEntityName(${head.tableName})}Service;
+import com.sys.service.impl.CommonService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+@Service("${StringUtil.toFieldName(${head.tableName})}Service")
+@Transactional
+public class ${StringUtil.toEntityName(${head.tableName})}ServiceImpl extends CommonService implements ${StringUtil.toEntityName(${head.tableName})}Service {
+
+}

@@ -1,0 +1,20 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
+
+  <table id="dataTable"  class="easyui-datagrid"   align="center" data-options="height:370,toolbar:'#tools',onSortColumn:function(sort,order){$('#_order').val(sort+':'+order);getDataList();}">
+      <thead data-options="frozen:true">
+      <tr>
+          <th field="id" data-options="checkbox:true"></th>
+      </tr>
+      </thead>
+      <thead>
+      <tr>
+
+#foreach($field in ${head.fields})
+#if(${field.isShowList()})
+         ${ViewUtil.getFieldShow(${field})}
+#end
+#end
+         <th field="cz"   data-options="formatter: function(value,row,index){ return buttonCz(value,row,index);}" >操作</th>
+        </tr>
+      </thead>
+  </table>

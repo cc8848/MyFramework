@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+       http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-4.0.xsd
+         http://www.springframework.org/schema/mvc
+		http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd ">
+
+
+    <context:component-scan base-package="com.*,business.*" >
+        <context:include-filter   type="annotation"
+                                  expression="org.springframework.stereotype.Controller" />
+        <context:exclude-filter  type="annotation"
+                                 expression="org.springframework.stereotype.Service" />
+
+    </context:component-scan>
+
+    <mvc:annotation-driven>
+        <mvc:message-converters>
+            <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+                <property name="objectMapper" ref="customObjectMapper"></property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <bean id="customObjectMapper" class="com.sys.mapper.CustomObjectMapper"></bean>
+
+
+    <bean id="jspViewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+          p:order="3">
+        <property name="viewClass"
+                  value="org.springframework.web.servlet.view.JstlView" />
+        <property name="contentType" value="text/html" />
+        <property name="prefix" value="/webpage/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <bean class="com.sys.exception.SimpleExceptionResolver">
+        <property name="defaultErrorView" value="sys/error/error"></property>   <!-- 默认为500，系统错误(error.jsp) -->
+        <property name="exceptionAttribute" value="ex"></property>
+        <property name="exceptionMappings">
+            <props>
+                <!-- 这里你可以根据需要定义N多个错误异常转发 -->
+                <prop key="java.sql.SQLException">sys/error/dbError</prop> <!-- 数据库错误(dbError.jsp) -->
+                <prop key="org.springframework.web.bind.ServletRequestBindingException">sys/error/bizError</prop> <!-- 参数绑定错误(如：必须参数没传递)(bizError.jsp) -->
+                <prop key="java.lang.IllegalArgumentException">sys/error/bizError</prop>  <!-- 参数错误(bizError.jsp) -->
+                <prop key="org.springframework.validation.BindException">sys/error/bizError</prop>  <!-- 参数类型有误(bizError.jsp) -->
+                <prop key="com.sys.exception.AjaxException">sys/error/ajaxError</prop>  <!-- ajax请求错误-->
+                <prop key="java.lang.Exception">sys/error/unknowError</prop>  <!-- 其他错误为'未定义错误'(unknowError.jsp) -->
+            </props>
+        </property>
+    </bean>
+    <!-- 拦截器 -->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**" />
+            <bean class="com.sys.interceptors.EncodingInterceptor" />
+        </mvc:interceptor>
+        <mvc:interceptor>
+            <mvc:mapping path="/**" />
+            <bean class="com.sys.interceptors.AuthInterceptor">
+                <property name="excludeUrls">
+                    <list>
+                        <value>login.do?login</value>
+                        <value>login.do?sLogin*</value>
+                        <value>index.do*</value>
+                        <value>file.do*</value>
+                        <value>service/*</value>
+                        <value>sys/dic.do*</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:interceptor>
+    </mvc:interceptors>
+</beans>

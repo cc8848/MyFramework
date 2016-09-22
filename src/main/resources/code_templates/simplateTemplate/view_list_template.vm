@@ -1,0 +1,176 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
+<%@include file="/include/include.jsp"%>
+#set($j="$")
+<c:set var="actionUrl"  scope="request" >
+   ${j}{pageContext.request.contextPath}/${head.viewFolder}.do
+</c:set>
+<c:set var="tableName" value="${head.tableName}" scope="request" />
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${head.tableContent}</title>
+    <%@include file="/include/head.jsp"%>
+    <%@include file="/include/code/simple/view_ext.jsp" %>
+    <script  type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/code_js/common_method.js" ></script>
+    <script  type="text/javascript" src="${j}{pageContext.request.contextPath}/plug-in/code_js/simple/method.js" ></script>
+    <script type="text/javascript" >
+        var context='${j}{ pageContext.request.contextPath}';
+        window.onload=(function(){ getDataList();
+
+            $("#dataTable").datagrid({
+                onDblClickCell: function (rowid,rowdata) {
+                    //  alert(rowid);
+                    // countYjs();
+                    //   showDetail();
+                    showDetailByDbClick(rowid)
+                }
+            });
+        });//初始化
+
+        //打开更新对话框
+        function showUpdateDia(){
+            var row=${j}("#dataTable").datagrid("getChecked");
+            if(row.length==0){
+                alertMsg("请选择条目");
+                return false;
+            }
+            if(row.length>1){
+                alertMsg("只能选择一条!");
+                return false;
+            }
+            if(!checkDataState(row[0])){
+                alertMsg("当前数据不可操作！");
+                return false;
+            }
+            $("#editFrame").attr("src","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_update.jsp?id="+row[0].id);
+            $("#editDia").dialog("setTitle","更新数据");
+            openEasyuiDialog("editDia");
+           // showBussinessWindow("更新","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_update.jsp?id="+row[0].id);
+        }
+        //打开新增对话框
+        function showAddDia(){
+            $("#editFrame").attr("src","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_update.jsp");
+            $("#editDia").dialog("setTitle","新增数据");
+            openEasyuiDialog("editDia");
+        }
+
+        //查看详情
+        function showDetail(){
+            var row=${j}("#dataTable").datagrid("getChecked");
+            if(row.length==0){
+                alertMsg("请选择条目");
+                return false;
+            }
+            if(row.length>1){
+                alertMsg("只能选择一条!");
+                return false;
+            }
+            $("#editFrame").attr("src","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_detail.jsp?id="+row[0].id);
+            $("#editDia").dialog("setTitle","数据详情");
+            openEasyuiDialog("editDia");
+            //showBussinessWindow("详情","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_detail.jsp?id="+row[0].id);
+        }
+
+        //双击查看详情
+        function showDetailByDbClick(rowid){
+            var row=$("#dataTable").datagrid("getChecked");
+            if(row.length==0){
+                alertMsg("请选择条目");
+                return false;
+            }
+            if(row.length>1){
+                alertMsg("只能选择一条!");
+                return false;
+            }
+            $("#editFrame").attr("src","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_detail.jsp?id="+row[rowid].id);
+            $("#editDia").dialog("setTitle","数据详情");
+            openEasyuiDialog("editDia");
+            //showBussinessWindow("详情","${j}{pageContext.request.contextPath}/webpage/${head.viewFolder}/${head.tableName}_detail.jsp?id="+row[0].id);
+   }
+
+        //操作按钮
+        function buttonCz(value,row,index){
+            var button="";
+        <pro:authFilter buttonCode="del" actionUrl="${j}{_modulesLink}" >
+                    button="<a href='javascript:void(0);' onclick=\"delData('"+row.id+"',"+checkDataState(row)+")\">[删除]</a>";
+        </pro:authFilter>
+            return button;
+        }
+
+        //查看文件按钮
+        function showViewFile(value,row,fieldName,showType){
+            var button="";
+        <pro:authFilter buttonCode="viewfile" actionUrl="${j}{_modulesLink}" >
+            if(${j}.trim(value).length<=0)
+            value="upload/"+row.id+"/"+fieldName;
+            button="<a href='javascript:void(0);' onclick=\"showFileList('"+value+"','"+showType+"')\">[查看文件]</a>";
+        </pro:authFilter>
+            return button;
+        }
+
+    </script>
+</head>
+<body class="easyui-layout" title="${head.tableContent}" align="center" style="width: 900px;height: 650px" fit="true">
+        <div data-options="region:'north'" align="center" style="width: 100%;height: 150px;overflow: auto" >
+            <form id="searchForm" method="post">
+                <%--预定义条件--%>
+                <c:forEach items="${j}{_conditions}" var="_condition">
+                    <c:forEach items="${j}{_condition.value}" var="_val">
+                        <input type="hidden" name="${j}{_condition.key}"  value="${j}{_val}" />
+                    </c:forEach>
+                </c:forEach>
+                <input type="hidden" name="pageNum" id="pageNum" value="1" />
+                <input type="hidden" name="_tableName" id="_tableName" value="${head.tableName}" />
+                <input type="hidden" id="_order" name="orders" />
+                <table width="100%" >
+                    <tr height="20">
+                        <td class="head_search" colspan="20" style="text-align:left;height:20px;padding:10px 0 0 0;">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<b class="head_font" style="font-size:13px">数据查询</b>
+                        </td>
+                    </tr>
+                    <tr height="30">
+#set($colSpan=3)
+#set($total=0)
+#foreach($field in ${head.fields})
+#if(${field.isQuery()})
+#set($total=$total+1)
+                        <td  width="10%" align="right">${field.fieldContent}：</td><td>${ViewUtil.getFieldQuery(${field})}</td>
+#if($total%$colSpan==0)
+                    </tr>
+                    <tr>
+#end
+#end
+#end
+                    </tr>
+                    <tr align="center">
+                        <td colspan="6" style="border-bottom:1px solid #d8d8d8;padding:5px 25px 10px 0;height:25px;">
+                            <a href="javascript:void(0);" class=" easyui-linkbutton" onclick="getDataList()">查询</a>
+                            &nbsp;&nbsp;<a href="javascript:void(0);"  class="easyui-linkbutton"   onclick="resetForm()">重置</a>
+                        </td>
+                    </tr>
+               </table>
+            </form>
+            </div>
+        <div data-options="region:'center'" style="height:500px;margin:20px 0 0 0;" align="center">
+            <table width="100%" >
+                <tr height="20">
+                    <td class="head_search" colspan="20" style="text-align:left;padding:0 0 10px 0;">
+                        &nbsp;&nbsp;&nbsp;&nbsp;<b class="head_font" style="font-size:13px">数据列表</b>
+                    </td>
+                </tr>
+            </table>
+            <%@include file="${head.tableName}_list_data_list_cache.jsp"%>
+        </div>
+        <div  data-options="region:'south'" >
+            <div class="easyui-panel" style="height: 38px;">
+                <div id="pager" class="easyui-pagination" data-options="showRefresh:false,showPageList:false,total:0,onSelectPage: function(pageNumber, pageSize){ $('#pageNum').val(pageNumber); getDataList();}"></div>
+            </div>
+        </div>
+<div id="tools" style="padding: 5px">
+<%@include file="/include/code/business_button_core.jsp"%>
+<%@include file="/include/code/business_button_ext.jsp"%>
+</div>
+<%@include file="/include/code/business_dialog.jsp" %>
+<%@include file="/include/code/business_footer_ext.jsp" %>
+</body>
+</html>

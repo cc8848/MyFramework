@@ -1,0 +1,240 @@
+#set($url=${head.viewFolder})
+#set($entityName=${StringUtil.toEntityName(${head.tableName})})
+#set($fieldName=${StringUtil.toFieldName(${head.tableName})})
+package ${head.basePackageName}.controller;
+
+import businesscore.dic_business_xxinfo.service.DicBusinessTreeService;
+import com.sys.constant.Globals;
+import ${head.basePackageName}.entity.${entityName}Entity;
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+import ${head.basePackageName}.entity.${StringUtil.toEntityName(${sub.tableName})}Entity;
+#end
+#end
+import ${head.basePackageName}.service.${entityName}Service;
+import org.apache.commons.lang.StringUtils;
+import com.sys.service.ISystemService;
+import com.sys.util.*;
+import org.hibernate.criterion.Criterion;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+
+@Controller
+@RequestMapping("/$url")
+public class ${entityName}Controller {
+    @Resource
+    private ${entityName}Service ${fieldName}Service;
+    @Resource
+    private ISystemService systemService;
+    @Resource
+    private DicBusinessTreeService dicBusinessTreeService;
+    /**
+    * 转入页面
+    * @return
+    */
+    @RequestMapping(params = "toList")
+    public String toList(HttpServletRequest request){
+        request.setAttribute("_modulesLink", ContextHolderUtil.getRequestUrl());
+        request.setAttribute("_conditions", ResourceUtil.getParamsMap(request));
+        Integer boxNums=dicBusinessTreeService.getBoxNumByTableName("business_"+"${head.tableName}".substring(0,"${head.tableName}".indexOf("_aj"))).getMaxpagenum();
+        request.setAttribute("boxNums",boxNums);
+        return "$url/${head.tableName}_list";
+    }
+    /**
+    * 获取数据列表
+    * @param
+    * @return
+    */
+    @RequestMapping(params = "datagrid")
+    @ResponseBody
+    public DataGrid datagrid(DataGrid d,HttpServletRequest request){
+        if(StringUtils.isBlank(d.getOrders()))
+            d.setOrders("_createDate:desc,_updateDate:desc");
+        List<Criterion> list= BeanUtil.generateCriterions(${entityName}Entity.class, request, false);
+        ${fieldName}Service.fillDataGrid(${entityName}Entity.class,list,d);
+        return d;
+    }
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+    /**
+    * 获取${sub.tableContent}列表
+    * @param
+    * @return
+    */
+    @RequestMapping(params = "${StringUtil.toFieldName(${sub.tableName})}s")
+    @ResponseBody
+    public List<${StringUtil.toEntityName(${sub.tableName})}Entity> ${StringUtil.toFieldName(${sub.tableName})}s(DataGrid d,HttpServletRequest request){
+        List<Criterion> list= BeanUtil.generateCriterions(${StringUtil.toEntityName(${sub.tableName})}Entity.class, request, false);
+        ${fieldName}Service.fillDataGrid(${StringUtil.toEntityName(${sub.tableName})}Entity.class,list,d);
+        return ${fieldName}Service.getDataList(${StringUtil.toEntityName(${sub.tableName})}Entity.class,list,null);
+    }
+
+    /**
+    * 批量删除
+    * @param ids
+    * @return
+    */
+    @RequestMapping(params = "del${StringUtil.toFieldName(${sub.tableName})}s")
+    @ResponseBody
+    public SuccessMsg del${StringUtil.toFieldName(${sub.tableName})}s(String[] ids){
+        SuccessMsg j=new SuccessMsg();
+        if (ids != null) {
+            j.setSuccess(true);
+            j.setMsg("成功删除"+ids.length+"条记录");
+            for(int i=0;i<ids.length;i++){
+                if(!${fieldName}Service.cascadeDel(${StringUtil.toEntityName(${sub.tableName})}Entity.class,ids[i])){
+                j.setSuccess(false);
+                j.setMsg("删除失败!");
+                }
+                systemService.addLog(${StringUtil.toEntityName(${sub.tableName})}Entity.class.getSimpleName()+j.getMsg(),Globals.LOG_DEL);
+            }
+        }
+        return j;
+
+    }
+#end
+#end
+    /**
+    * 保存或更新
+    * @param bean
+    * @return
+    */
+    @RequestMapping(params = "save")
+    @ResponseBody
+    public SuccessMsg save(${entityName}Entity bean){
+        SuccessMsg json=new SuccessMsg();
+        String logType=Globals.LOG_INSERT;
+        if(StringUtils.isBlank(bean.getId())){
+            bean.setId(null);
+            json.setSuccess(${fieldName}Service.save(bean));
+        }else{
+            ${entityName}Entity ${fieldName}Entity=${fieldName}Service.getEntity(${entityName}Entity.class,bean.getId());
+            if(${fieldName}Entity==null) ${fieldName}Entity=new ${entityName}Entity();
+            BeanUtil.copyNotNull2Bean(bean,${fieldName}Entity);
+            json.setSuccess(${fieldName}Service.update(${fieldName}Entity));
+            logType=Globals.LOG_UPDATE;
+        }
+        if(json.isSuccess()) json.setMsg("保存成功!");
+        else  json.setMsg("保存失败！");
+        systemService.addLog(${entityName}Entity.class.getSimpleName()+ json.getMsg(), logType);
+        return json;
+    }
+
+    /**
+    * 通过传入json方式保存
+    * @param jsonData
+    * @return
+    */
+    @RequestMapping(params = "jsonSave")
+    @ResponseBody
+    public SuccessMsg jsonSave(String jsonData){
+        ${entityName}Entity bean= (${entityName}Entity) JsonUtil.fromJson(jsonData,${entityName}Entity.class);
+        SuccessMsg json=new SuccessMsg();
+        String logType= Globals.LOG_UPDATE;
+        Map<String,Object> dataMap=new HashMap<>();
+        if(StringUtils.isBlank(bean.getId())){
+            bean.setId(null);
+            logType=Globals.LOG_INSERT;
+        }
+        boolean isSuccess=true;
+        Object id=null;
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+        id=${fieldName}Service.mergeOneToMany(bean,"${fieldName}Entity",bean.${StringUtil.toGetMethodName(${sub.tableName})}s());
+        isSuccess=isSuccess&&(id!=null);
+#end
+#end
+        dataMap.put("id",id);
+        json.setDataMap(dataMap);
+        json.setSuccess(isSuccess);
+        if(json.isSuccess()) json.setMsg("保存成功!");
+        else  json.setMsg("保存失败！");
+        systemService.addLog(${entityName}Entity.class.getSimpleName()+ json.getMsg(), logType);
+        return json;
+    }
+    /**
+    * 获取实体bean 返回json
+    * @param id
+    * @return
+    */
+    @RequestMapping(params = "get")
+    @ResponseBody
+    public ${entityName}Entity get(String id){
+        Assert.notNull(id);
+        return  ${fieldName}Service.getEntity(${entityName}Entity.class,id);
+    }
+
+    /**
+    * 获取详情
+    * @param id
+    * @param request
+    * @return
+    */
+    @RequestMapping(params = "detail")
+    public String detail(String id,HttpServletRequest request){
+        Assert.notNull(id);
+        request.setAttribute("bean",${fieldName}Service.getEntity(${entityName}Entity.class,id));
+        return "$url/${head.tableName}_detail";
+    }
+    /**
+    * 删除
+    * @param id
+    * @return
+    */
+    @RequestMapping(params = "del")
+    @ResponseBody
+        public SuccessMsg del(String id){
+        SuccessMsg j=new SuccessMsg();
+        ${entityName}Entity d=new ${entityName}Entity();
+        d.setId(id);
+#if(${head.isIndex}==1)
+        j.setSuccess(${fieldName}Service.delUseFlag(d));
+#else
+        j.setSuccess(${fieldName}Service.delete(d));
+#end
+        if(j.isSuccess())
+            j.setMsg("删除成功!");
+        else
+            j.setMsg("删除失败！");
+        systemService.addLog(${entityName}Entity.class.getSimpleName()+j.getMsg(),Globals.LOG_DEL);
+        return j;
+    }
+
+    /**
+    * 批量删除
+    * @param ids
+    * @return
+    */
+    @RequestMapping(params = "muldel")
+    @ResponseBody
+    public SuccessMsg mulDel(String[] ids){
+        SuccessMsg j=new SuccessMsg();
+        if (ids != null) {
+            j.setSuccess(true);
+            j.setMsg("成功删除"+ids.length+"条记录");
+            ${entityName}Entity d=new ${entityName}Entity();
+            for(int i=0;i<ids.length;i++){
+                d.setId(ids[i]);
+#if(${head.isIndex}==1)
+                if(!${fieldName}Service.delUseFlag(d)){
+#else
+                if(!${fieldName}Service.delete(d)){
+#end
+                    j.setSuccess(false);
+                    j.setMsg("删除失败!");
+                }
+                systemService.addLog(${entityName}Entity.class.getSimpleName()+j.getMsg(),Globals.LOG_DEL);
+            }
+        }
+        return j;
+
+    }
+}

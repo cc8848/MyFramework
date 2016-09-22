@@ -1,0 +1,54 @@
+﻿@charset "utf-8";
+/* CSS Document */
+*{margin:0 auto; padding:0;}
+article,aside,dialog,footer,header,section,footer,nav,figure,menu{display:block}
+body{margin:0px;padding:0px;background:#fff;font-size:12px; color:#666; font-family:"Microsoft YaHei","微软雅黑",tahoma,arial;width:100%;}
+img{border:0;}
+a{text-decoration:none; color:#333;}
+a:hover{color:#00a3e6;}
+ul{list-style-type: none;}
+.wrap{width:1170px;height:auto;}
+.clear{clear:both;}
+
+header{width:100%;height:100px;background:#fff;} 
+section{width:100%;height:560px;background: url(../images/body_bg.jpg) no-repeat bottom center;}
+footer{width:100%;height:60px;background:#fff;} 
+
+#loginblock{float:left;width: 320px;height: 300px;padding:20px 20px 40px 20px;background: url(../images/loginblock_bg.png) repeat top center;margin:90px 0px 0px 120px; border-radius: 5px;}
+.logininfo{margin: 0 auto;}
+.logininfo dl{padding: 0;margin: 25px 0 0 0;text-align: center;}
+.logininfo dd .text{font-size:12px; color:#999; font-family:"Microsoft YaHei","微软雅黑",tahoma,arial;width: 200px;padding: 14px 10px 14px 45px;border:1px solid #cbcbcb;border-radius:3px;}
+.logininfo .user .icon,.logininfo .password .icon{margin:14px 0px 0px 12px;width:26px;height: 19px;display: inline-block; position: absolute;overflow: hidden;background: url(../images/icon.png) no-repeat;}		
+.logininfo .user .icon{background-position: 0px 0px;border-right:1px solid #cbcbcb;}
+.logininfo .password .icon{ background-position: 0px -22px;border-right:1px solid #cbcbcb;}		
+.logininfo .submit{
+outline:medium;width:252px;
+height:46px;font-size: 16px;
+font-family:"Microsoft YaHei","微软雅黑",tahoma,arial;
+background: #ec3846;
+background: -moz-linear-gradient(top,  #f64b59 0%, #ec3846 100%); /* FF3.6+ */
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f64b59), color-stop(100%,#ec3846)); /* Chrome,Safari4+ */
+background: -webkit-linear-gradient(top,  #f64b59 0%,#ec3846 100%); /* Chrome10+,Safari5.1+ */
+background: -o-linear-gradient(top,  #f64b59 0%,#ec3846 100%); /* Opera 11.10+ */
+background: -ms-linear-gradient(top,  #f64b59 0%,#ec3846 100%); /* IE10+ */
+background: linear-gradient(to bottom,  #f64b59 0%,#ec3846 100%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f1f1f1', endColorstr='#ec3846',GradientType=0 ); /* IE6-9 */
+border:1px solid #ec3846;
+border-radius: 2px;
+-webkit-border-radius: 2px;
+color: #fff;
+}
+.logininfo .submit:hover {
+border:1px solid #ff0014;
+background: #ff0014;
+}
+.logininfo .submit:focus {
+    border:1px solid #ff0014;
+    background: #ff0014;
+}
+
+.logininfo .msg{width:252px;line-height:24px;border-top:1px dotted #999;margin-top:30px;padding-top: 15px;text-align: left;}
+.logininfo .msg b{color: #f00;}
+
+#copyright{margin-top: 12px;line-height: 24px;text-align: center;}
+ 

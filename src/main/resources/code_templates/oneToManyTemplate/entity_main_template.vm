@@ -1,0 +1,65 @@
+package ${head.basePackageName}.entity;
+
+import org.hibernate.annotations.GenericGenerator;
+import javax.persistence.*;
+import com.code.entity.BaseEntity;
+import java.util.List;
+import org.codehaus.jackson.annotate.JsonIgnore;
+##主表信息
+/**
+*${head.tableContent}
+*${today}
+**/
+@Entity
+@Table(name = "${head.tableName}")
+public class ${StringUtil.toEntityName(${head.tableName})}Entity  extends BaseEntity{
+##成员变量
+#foreach($field in ${head.fields})
+    //${field.fieldContent}
+#if(${field.isKey()})
+    @Id
+    @GeneratedValue(generator = "paymentableGenerator")
+    @GenericGenerator(name = "paymentableGenerator", strategy = "uuid")
+    @Column(name ="ID",nullable=false,length=36)
+#else
+    @Column(name="${field.fieldName}"#if(${field.getLength()}>0) ,length = ${field.getLength()}#end #if(${field.isNull}) #end)
+#end
+    private ${ClassUtil.getClassName(${field.fieldType})}  ${StringUtil.toFieldName(${field.fieldName})}#if(${field.fieldType}=='int') = 0 #end;
+#end
+##子表信息  无关联
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+    @Transient
+    @JsonIgnore
+    private List<${StringUtil.toEntityName(${sub.tableName})}Entity> ${StringUtil.toFieldName(${sub.tableName})}s;
+#end
+#end
+##构造函数
+    public ${StringUtil.toEntityName(${head.tableName})}Entity(){
+
+    }
+
+    public ${StringUtil.toEntityName(${head.tableName})}Entity(String id){
+        setId(id);
+    }
+##get set方法
+#foreach($field in ${head.fields})
+    public ${ClassUtil.getClassName(${field.fieldType})} ${StringUtil.toGetMethodName(${field.fieldName})}(){
+        return ${StringUtil.toFieldName(${field.fieldName})};
+    }
+    public void ${StringUtil.toSetMethodName(${field.fieldName})}(${ClassUtil.getClassName(${field.fieldType})} ${StringUtil.toFieldName(${field.fieldName})}){
+        this.${StringUtil.toFieldName(${field.fieldName})}=${StringUtil.toFieldName(${field.fieldName})};
+    }
+#end
+##get set 方法
+#if(${head.subList})
+#foreach($sub in ${head.subList})
+    public  List<${StringUtil.toEntityName(${sub.tableName})}Entity> ${StringUtil.toGetMethodName(${sub.tableName})}s(){
+        return ${StringUtil.toFieldName(${sub.tableName})}s;
+    }
+    public void ${StringUtil.toSetMethodName(${sub.tableName})}s(List<${StringUtil.toEntityName(${sub.tableName})}Entity> ${StringUtil.toFieldName(${sub.tableName})}s){
+       this.${StringUtil.toFieldName(${sub.tableName})}s=${StringUtil.toFieldName(${sub.tableName})}s;
+    }
+#end
+#end
+}
