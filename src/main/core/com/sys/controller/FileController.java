@@ -4,14 +4,12 @@ package com.sys.controller;
 import com.sys.constant.Globals;
 import com.sys.entity.FileBean;
 import com.sys.service.ISystemService;
-import com.sys.util.*;
+import com.sys.util.FileUtil;
+import com.sys.util.ResourceUtil;
+import com.sys.util.StringUtil;
+import com.sys.util.SuccessMsg;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.util.FileCopyUtils;
@@ -20,14 +18,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
-import sun.misc.BASE64Encoder;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.lang.reflect.Method;
-import java.text.DecimalFormat;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,8 +40,6 @@ import java.util.List;
 public class FileController {
     @Resource
     private ISystemService systemService;
-
-
     private static String swfPath="";
 
     /**

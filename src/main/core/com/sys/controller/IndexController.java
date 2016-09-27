@@ -1,15 +1,12 @@
 package com.sys.controller;
 
-import com.sys.annotation.Ehcache;
 import com.sys.entity.Client;
-import com.sys.entity.SessionUser;
 import com.sys.entity.SysMenuEntity;
 import com.sys.entity.SysRoleEntity;
 import com.sys.manager.ClientManager;
 import com.sys.service.SysMenuService;
 import org.apache.commons.beanutils.BeanComparator;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -20,9 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.*;
 
 /**

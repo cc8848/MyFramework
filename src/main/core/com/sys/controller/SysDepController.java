@@ -153,15 +153,4 @@ public class SysDepController {
 
     }
 
-    /**
-     * 主键策略
-     * @param pid
-     * @return
-     */
-    private Long generateId(Long pid){
-        String cId=(System.currentTimeMillis()+"").substring(9,13);
-        if(pid!=null&&pid>0)
-            return new Long(pid+cId);
-        return new Long(cId);
-    }
 }

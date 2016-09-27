@@ -1,11 +1,8 @@
 package com.sys.controller;
 
-import com.sys.annotation.Ehcache;
-import com.sys.constant.Globals;
 import com.sys.entity.CacheManageEntity;
 import com.sys.util.CacheUtil;
 import com.sys.util.SuccessMsg;
-import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +10,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author zzl

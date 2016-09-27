@@ -1,6 +1,5 @@
 package com.sys.controller;
 
-import com.code.entity.BaseTreeEntity;
 import com.code.service.ITableInfService;
 import com.sys.constant.Globals;
 import com.sys.entity.ComboBox;
@@ -8,9 +7,9 @@ import com.sys.entity.ComboTree;
 import com.sys.entity.DicBean;
 import com.sys.service.DicService;
 import com.sys.service.ISystemService;
-import com.sys.util.SuccessMsg;
 import com.sys.util.BeanUtil;
 import com.sys.util.DataGrid;
+import com.sys.util.SuccessMsg;
 import org.hibernate.criterion.Criterion;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.Serializable;
 import java.util.List;
 
 /**
