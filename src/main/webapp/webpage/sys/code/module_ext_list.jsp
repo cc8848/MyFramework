@@ -8,7 +8,6 @@
 <head>
     <title>扩展组件管理</title>
     <%@include file="/include/head.jsp"%>
-    <%@include file="/include/code/one2many/view_ext.jsp" %>
     <script  type="text/javascript" src="${pageContext.request.contextPath}/plug-in/code_js/common_method.js" ></script>
     <script  type="text/javascript" src="${pageContext.request.contextPath}/plug-in/code_js/one2many/method.js" ></script>
     <script type="text/javascript" >

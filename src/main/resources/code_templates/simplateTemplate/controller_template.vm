@@ -58,33 +58,6 @@ private SysDepService sysDepService;
         if(StringUtils.isBlank(d.getOrders()))
             d.setOrders("_createDate:desc,_updateDate:desc");
         List<Criterion> list= BeanUtil.generateCriterions(${entityName}Entity.class, request, false);
-
-        if ("2".equals(request.getParameter("cz"))) {
-        list.add(Restrictions.or(Restrictions.eq("syszt", 0), Restrictions.eq("syszt", 2)));
-        } else {
-        list.add(Restrictions.eq("syszt", 0));
-        }
-
-    // 权限有两种可能，材料级别，
-    // 市级，【部门号0536，潍坊市】，可以看到所有的
-    // 市直级，【部门号0536，潍坊市】，可以看到所有的
-    // 局级，【部门号0536001，临朐县】，可以看到临朐本部门和子部门所有的
-    // 区户籍管理，【部门号：053600101：临朐县户籍管理】可以看到临朐户籍部门和子部门所有的
-    // 区—管理中心，【部门号：05360010101：临朐县户籍管理—管理中心】可以看到临朐户籍部门，户籍科领导所属。
-    // 区—管理中心-户籍科，【部门号：05360010101001：临朐县户籍管理—管理中心—户籍科】只能看自己的，业务员。
-    // 档案级别：凡是能看到档案的人，均具有，档案管理的角色权限，所以最底层不同于材料级别，可以看到本部门，其他不变
-    HttpSession s=request.getSession();
-    SessionUser sessionUser=(SessionUser)s.getAttribute("login_session_user");
-    if(sessionUser.getDep().getDepLogoId().length()>=13)
-    {
-    list.add(Restrictions.eq("_createUserId", sessionUser.getUserId()));
-    }
-    else{
-    List<Long> depList= sysDepService.getChildrenId((sessionUser.getDep().getId()));
-        list.add(Restrictions.in("depIdIdentify", depList));
-        }
-
-
         ${fieldName}Service.fillDataGrid(${entityName}Entity.class,list,d);
         return d;
     }

@@ -273,9 +273,8 @@ public class TableInfController {
     @RequestMapping(params = "genereatecode")
     @ResponseBody
     public SuccessMsg genereateCode(CodeConfigBean config){
+        //视图文件夹
         config.setViewFolder(config.getViewFolder().toLowerCase());
-        Map<String,String> sourceMap=new HashMap<>();
-       // SuccessMsg j=fillSourceMap(sourceMap,config.getCode_t());
         SuccessMsg j=new SuccessMsg(true,"代码生成成功！");
         if(!j.isSuccess())
             return j;
@@ -283,6 +282,7 @@ public class TableInfController {
         list.add(Restrictions.eq("head.id",config.getHeadId()));
         List<Order> orders=new ArrayList<>();
         orders.add(Order.asc("fieldOrder"));
+        //查询出表信息并用config配置
         TableHeadBean head=initTableHead(list,orders,config);
         Set<CodeType> codeTypeSet=new HashSet<>();
         if(config.getCodeType()!=null){

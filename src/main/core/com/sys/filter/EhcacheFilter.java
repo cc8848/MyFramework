@@ -30,7 +30,7 @@ public class EhcacheFilter  extends SimplePageCachingFilter{
         excludes=StringUtils.split(filterConfig.getInitParameter("exclude"),",");
     }
     @Override
-    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws AlreadyGzippedException, AlreadyCommittedException, FilterNonReentrantException, LockTimeoutException, Exception {
+    protected void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws  Exception {
         if (cacheURLs == null) {
             init();
         }

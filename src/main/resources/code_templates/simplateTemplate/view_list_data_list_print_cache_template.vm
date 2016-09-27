@@ -1,16 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" pageEncoding="UTF-8"%>
 <%@include file="/include/print/print.jsp"%>
 <%@include file="/include/print/printBar.jsp"%>
-<div  id="page1">
-  <table id="printTable"  class="easyui-datagrid"   align="center" >
-     <thead>
-      <tr>
-#foreach($field in ${head.fields})
+<div id="page1">
+    <table id="printTable" class="easyui-datagrid" align="center">
+        <thead>
+        <tr>
+            #foreach($field in ${head.fields})
 #if(${field.isShowList()})
-         ${ViewUtil.getFieldShow(${field})}
+                ${ViewUtil.getFieldShow(${field})}
+            #end
 #end
-#end
-            </tr>
-      </thead>
-  </table>
+        </tr>
+        </thead>
+    </table>
 </div>
